@@ -9,6 +9,8 @@ export type TransactionRow = {
   category: string | null;
   note: string | null;
   occurred_on: string;
+  payment_method: string | null;
+  is_recurring: boolean;
 };
 
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" });
@@ -24,12 +26,14 @@ export function TransactionRow({ tx }: { tx: TransactionRow }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-vita-900">
           {tx.category || (isIncome ? "Gelir" : "Gider")}
+          {tx.is_recurring && <span className="ml-2 text-xs font-normal text-vita-400">↻ düzenli</span>}
         </p>
         <p className="truncate text-xs text-vita-500">
           {new Date(tx.occurred_on + "T00:00:00").toLocaleDateString("tr-TR", {
             day: "numeric",
             month: "short",
           })}
+          {tx.payment_method ? ` · ${tx.payment_method}` : ""}
           {tx.note ? ` · ${tx.note}` : ""}
         </p>
       </div>

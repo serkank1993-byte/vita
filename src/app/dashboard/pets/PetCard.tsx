@@ -1,5 +1,6 @@
 "use client";
 
+import { Field, inputClass } from "@/components/Field";
 import { updatePet, deletePet } from "./actions";
 
 export type PetRow = {
@@ -9,6 +10,8 @@ export type PetRow = {
   breed: string | null;
   birth_date: string | null;
   next_vet_date: string | null;
+  weight_kg: number | null;
+  microchip_number: string | null;
   notes: string | null;
 };
 
@@ -40,7 +43,9 @@ export function PetCard({ pet }: { pet: PetRow }) {
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-vita-900">{pet.name}</p>
             <p className="truncate text-xs text-vita-500">
-              {[pet.species, pet.breed].filter(Boolean).join(" · ") || "Tür belirtilmedi"}
+              {[pet.species, pet.breed, pet.weight_kg ? `${pet.weight_kg} kg` : null]
+                .filter(Boolean)
+                .join(" · ") || "Detay belirtilmedi"}
             </p>
           </div>
           {pet.next_vet_date && (
@@ -56,54 +61,52 @@ export function PetCard({ pet }: { pet: PetRow }) {
 
         <form action={updateWithId} className="space-y-2 border-t border-vita-100 px-4 py-3">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <input
-              name="name"
-              type="text"
-              defaultValue={pet.name}
-              required
-              placeholder="Ad"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <input
-              name="species"
-              type="text"
-              defaultValue={pet.species ?? ""}
-              placeholder="Tür (kedi, köpek...)"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <input
-              name="breed"
-              type="text"
-              defaultValue={pet.breed ?? ""}
-              placeholder="Cins"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <div className="flex items-center gap-2 text-xs text-vita-500">
-              <label className="w-20 shrink-0">Doğum:</label>
+            <Field label="Ad">
+              <input name="name" type="text" defaultValue={pet.name} required className={inputClass} />
+            </Field>
+            <Field label="Tür">
+              <input name="species" type="text" defaultValue={pet.species ?? ""} className={inputClass} />
+            </Field>
+            <Field label="Cins">
+              <input name="breed" type="text" defaultValue={pet.breed ?? ""} className={inputClass} />
+            </Field>
+            <Field label="Ağırlık (kg)">
+              <input
+                name="weight_kg"
+                type="number"
+                step="0.1"
+                defaultValue={pet.weight_kg ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Doğum tarihi">
               <input
                 name="birth_date"
                 type="date"
                 defaultValue={pet.birth_date ?? ""}
-                className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+                className={inputClass}
               />
-            </div>
-            <div className="flex items-center gap-2 text-xs text-vita-500 sm:col-span-2">
-              <label className="w-28 shrink-0">Sonraki veteriner:</label>
+            </Field>
+            <Field label="Sonraki veteriner">
               <input
                 name="next_vet_date"
                 type="date"
                 defaultValue={pet.next_vet_date ?? ""}
-                className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+                className={inputClass}
               />
-            </div>
+            </Field>
+            <Field label="Mikroçip numarası" className="sm:col-span-2">
+              <input
+                name="microchip_number"
+                type="text"
+                defaultValue={pet.microchip_number ?? ""}
+                className={inputClass}
+              />
+            </Field>
           </div>
-          <textarea
-            name="notes"
-            defaultValue={pet.notes ?? ""}
-            placeholder="Notlar (mama, alerji, aşı geçmişi...)"
-            rows={2}
-            className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
+          <Field label="Notlar">
+            <textarea name="notes" defaultValue={pet.notes ?? ""} rows={2} className={inputClass} />
+          </Field>
           <div className="flex items-center gap-2">
             <button
               type="submit"

@@ -9,6 +9,13 @@ function readDate(formData: FormData, field: string) {
   return value ? value : null;
 }
 
+function readWeight(formData: FormData) {
+  const raw = String(formData.get("weight_kg") ?? "").trim();
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function addPet(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
@@ -28,11 +35,14 @@ export async function addPet(formData: FormData) {
     breed: String(formData.get("breed") ?? "").trim() || null,
     birth_date: readDate(formData, "birth_date"),
     next_vet_date: readDate(formData, "next_vet_date"),
+    weight_kg: readWeight(formData),
+    microchip_number: String(formData.get("microchip_number") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
     created_by: user?.id,
   });
 
   revalidatePath("/dashboard/pets");
+  revalidatePath("/dashboard");
 }
 
 export async function updatePet(id: string, formData: FormData) {
@@ -48,15 +58,19 @@ export async function updatePet(id: string, formData: FormData) {
       breed: String(formData.get("breed") ?? "").trim() || null,
       birth_date: readDate(formData, "birth_date"),
       next_vet_date: readDate(formData, "next_vet_date"),
+      weight_kg: readWeight(formData),
+      microchip_number: String(formData.get("microchip_number") ?? "").trim() || null,
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id);
 
   revalidatePath("/dashboard/pets");
+  revalidatePath("/dashboard");
 }
 
 export async function deletePet(id: string) {
   const supabase = await createClient();
   await supabase.from("pets").delete().eq("id", id);
   revalidatePath("/dashboard/pets");
+  revalidatePath("/dashboard");
 }

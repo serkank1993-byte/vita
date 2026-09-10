@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
+import { Field, inputClass } from "@/components/Field";
 import { addItem, clearBought } from "./actions";
 import { ShoppingItemRow, type ShoppingItemRow as ShoppingItemRowType } from "./ShoppingItemRow";
 
@@ -7,7 +8,7 @@ export default async function ShoppingPage() {
   const supabase = await createClient();
   const { data: items } = await supabase
     .from("shopping_items")
-    .select("id, name, quantity, category, is_bought")
+    .select("id, name, quantity, category, store, is_bought")
     .order("is_bought", { ascending: true })
     .order("created_at", { ascending: false });
 
@@ -20,32 +21,29 @@ export default async function ShoppingPage() {
         description="Ailece paylaşılan alışveriş listesi — biri alınca işaretlesin, herkes görsün."
       />
 
-      <form action={addItem} className="flex flex-wrap gap-2 rounded-xl border border-vita-100 bg-white p-4">
-        <input
-          name="name"
-          type="text"
-          placeholder="Ürün adı..."
-          required
-          className="min-w-[10rem] flex-1 rounded-lg border border-vita-200 px-3 py-2 outline-none focus:border-vita-500"
-        />
-        <input
-          name="quantity"
-          type="text"
-          placeholder="Miktar (opsiyonel)"
-          className="w-28 rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
-        <input
-          name="category"
-          type="text"
-          placeholder="Kategori (opsiyonel)"
-          className="w-36 rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
-        >
-          Ekle
-        </button>
+      <form action={addItem} className="space-y-3 rounded-xl border border-vita-100 bg-white p-4">
+        <Field label="Ürün adı">
+          <input name="name" type="text" required className={inputClass} />
+        </Field>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Field label="Miktar">
+            <input name="quantity" type="text" placeholder="1 kg, 2 adet..." className={inputClass} />
+          </Field>
+          <Field label="Kategori">
+            <input name="category" type="text" placeholder="Market, eczane..." className={inputClass} />
+          </Field>
+          <Field label="Nereden">
+            <input name="store" type="text" placeholder="Migros, Şok..." className={inputClass} />
+          </Field>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
+            >
+              Ekle
+            </button>
+          </div>
+        </div>
       </form>
 
       <div className="mt-6 flex items-center justify-between">

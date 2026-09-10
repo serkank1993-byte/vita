@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
+import { Field, inputClass } from "@/components/Field";
 import { uploadFile } from "./actions";
 import { ArchiveFileRow } from "./ArchiveFileRow";
 
@@ -7,7 +8,7 @@ export default async function ArchivePage() {
   const supabase = await createClient();
   const { data: files } = await supabase
     .from("archive_files")
-    .select("id, file_name, storage_path, size_bytes, description, created_at")
+    .select("id, file_name, storage_path, size_bytes, description, category, created_at")
     .order("created_at", { ascending: false });
 
   const rows = files ?? [];
@@ -30,29 +31,34 @@ export default async function ArchivePage() {
 
       <form
         action={uploadFile}
-        className="space-y-2 rounded-xl border border-vita-100 bg-white p-4"
+        className="space-y-3 rounded-xl border border-vita-100 bg-white p-4"
         encType="multipart/form-data"
       >
-        <input
-          name="file"
-          type="file"
-          required
-          className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
-        <div className="flex gap-2">
-          <input
-            name="description"
-            type="text"
-            placeholder="Açıklama (opsiyonel)"
-            className="flex-1 rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
-          >
-            Yükle
-          </button>
+        <Field label="Dosya">
+          <input name="file" type="file" required className={inputClass} />
+        </Field>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Field label="Kategori">
+            <select name="category" defaultValue="" className={inputClass}>
+              <option value="">Seçilmedi</option>
+              <option value="Kimlik">Kimlik</option>
+              <option value="Fatura">Fatura</option>
+              <option value="Sözleşme">Sözleşme</option>
+              <option value="Sağlık">Sağlık</option>
+              <option value="Fotoğraf">Fotoğraf</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </Field>
+          <Field label="Açıklama">
+            <input name="description" type="text" className={inputClass} />
+          </Field>
         </div>
+        <button
+          type="submit"
+          className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
+        >
+          Yükle
+        </button>
       </form>
 
       <ul className="mt-6 space-y-2">

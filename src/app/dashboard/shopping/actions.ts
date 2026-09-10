@@ -13,6 +13,7 @@ export async function addItem(formData: FormData) {
 
   const quantity = String(formData.get("quantity") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
+  const store = String(formData.get("store") ?? "").trim();
 
   const supabase = await createClient();
   const {
@@ -24,6 +25,7 @@ export async function addItem(formData: FormData) {
     name,
     quantity: quantity || null,
     category: category || null,
+    store: store || null,
     created_by: user?.id,
   });
 

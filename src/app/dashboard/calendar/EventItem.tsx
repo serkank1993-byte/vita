@@ -2,12 +2,32 @@
 
 import { deleteEvent } from "./actions";
 
+export type EventCategory = "general" | "birthday" | "appointment" | "holiday" | "reminder";
+
 export type EventRow = {
   id: string;
   title: string;
   description: string | null;
+  location: string | null;
+  category: EventCategory;
   event_date: string;
   event_time: string | null;
+};
+
+const categoryLabels: Record<EventCategory, string> = {
+  general: "Genel",
+  birthday: "Doğum günü",
+  appointment: "Randevu",
+  holiday: "Tatil",
+  reminder: "Hatırlatma",
+};
+
+const categoryClass: Record<EventCategory, string> = {
+  general: "bg-vita-50 text-vita-600",
+  birthday: "bg-pink-50 text-pink-600",
+  appointment: "bg-blue-50 text-blue-600",
+  holiday: "bg-amber-50 text-amber-600",
+  reminder: "bg-purple-50 text-purple-600",
 };
 
 export function formatEventDate(dateStr: string) {
@@ -26,7 +46,13 @@ export function EventItem({ event }: { event: EventRow }) {
         {event.event_time && <span className="text-xs text-vita-500">{event.event_time.slice(0, 5)}</span>}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-vita-900">{event.title}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-medium text-vita-900">{event.title}</p>
+          <span className={`rounded-full px-2 py-0.5 text-xs ${categoryClass[event.category]}`}>
+            {categoryLabels[event.category]}
+          </span>
+        </div>
+        {event.location && <p className="mt-0.5 text-xs text-vita-500">📍 {event.location}</p>}
         {event.description && <p className="mt-0.5 text-sm text-vita-600">{event.description}</p>}
       </div>
       <button

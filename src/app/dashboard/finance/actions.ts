@@ -15,6 +15,8 @@ export async function addTransaction(formData: FormData) {
   const category = String(formData.get("category") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
   const occurredOn = String(formData.get("occurred_on") ?? "").trim();
+  const paymentMethod = String(formData.get("payment_method") ?? "").trim();
+  const isRecurring = formData.get("is_recurring") === "on";
 
   const supabase = await createClient();
   const {
@@ -28,14 +30,18 @@ export async function addTransaction(formData: FormData) {
     category: category || null,
     note: note || null,
     occurred_on: occurredOn || new Date().toISOString().slice(0, 10),
+    payment_method: paymentMethod || null,
+    is_recurring: isRecurring,
     created_by: user?.id,
   });
 
   revalidatePath("/dashboard/finance");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteTransaction(id: string) {
   const supabase = await createClient();
   await supabase.from("transactions").delete().eq("id", id);
   revalidatePath("/dashboard/finance");
+  revalidatePath("/dashboard");
 }

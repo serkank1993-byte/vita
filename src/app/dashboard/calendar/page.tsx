@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
+import { Field, inputClass } from "@/components/Field";
 import { addEvent } from "./actions";
 import { EventItem, type EventRow } from "./EventItem";
 
@@ -9,7 +10,7 @@ export default async function CalendarPage() {
 
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, description, event_date, event_time")
+    .select("id, title, description, location, category, event_date, event_time")
     .order("event_date", { ascending: true })
     .order("event_time", { ascending: true, nullsFirst: true });
 
@@ -23,39 +24,39 @@ export default async function CalendarPage() {
         description="Ailenin ortak etkinlikleri, randevuları ve hatırlatmaları."
       />
 
-      <form action={addEvent} className="space-y-2 rounded-xl border border-vita-100 bg-white p-4">
-        <input
-          name="title"
-          type="text"
-          placeholder="Etkinlik başlığı *"
-          required
-          className="w-full rounded-lg border border-vita-200 px-3 py-2 outline-none focus:border-vita-500"
-        />
-        <div className="flex flex-wrap gap-2">
-          <input
-            name="event_date"
-            type="date"
-            required
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <input
-            name="event_time"
-            type="time"
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <button
-            type="submit"
-            className="ml-auto rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
-          >
-            Ekle
-          </button>
+      <form action={addEvent} className="space-y-3 rounded-xl border border-vita-100 bg-white p-4">
+        <Field label="Etkinlik başlığı">
+          <input name="title" type="text" required className={inputClass} />
+        </Field>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Field label="Tarih">
+            <input name="event_date" type="date" required className={inputClass} />
+          </Field>
+          <Field label="Saat">
+            <input name="event_time" type="time" className={inputClass} />
+          </Field>
+          <Field label="Tür">
+            <select name="category" defaultValue="general" className={inputClass}>
+              <option value="general">Genel</option>
+              <option value="birthday">Doğum günü</option>
+              <option value="appointment">Randevu</option>
+              <option value="holiday">Tatil</option>
+              <option value="reminder">Hatırlatma</option>
+            </select>
+          </Field>
+          <Field label="Konum">
+            <input name="location" type="text" className={inputClass} />
+          </Field>
         </div>
-        <textarea
-          name="description"
-          placeholder="Not (opsiyonel)"
-          rows={2}
-          className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
+        <Field label="Not">
+          <textarea name="description" rows={2} className={inputClass} />
+        </Field>
+        <button
+          type="submit"
+          className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
+        >
+          Ekle
+        </button>
       </form>
 
       <div className="mt-6">

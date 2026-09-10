@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
+import { Field, inputClass } from "@/components/Field";
 import { addPet } from "./actions";
 import { PetCard, type PetRow } from "./PetCard";
 
@@ -7,7 +8,7 @@ export default async function PetsPage() {
   const supabase = await createClient();
   const { data: pets } = await supabase
     .from("pets")
-    .select("id, name, species, breed, birth_date, next_vet_date, notes")
+    .select("id, name, species, breed, birth_date, next_vet_date, weight_kg, microchip_number, notes")
     .order("created_at", { ascending: false });
 
   return (
@@ -17,50 +18,38 @@ export default async function PetsPage() {
         description="Ailenin dostlarının bilgileri, aşı/veteriner tarihleri ve notları."
       />
 
-      <form action={addPet} className="space-y-2 rounded-xl border border-vita-100 bg-white p-4">
+      <form action={addPet} className="space-y-3 rounded-xl border border-vita-100 bg-white p-4">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <input
-            name="name"
-            type="text"
-            placeholder="Ad *"
-            required
-            className="rounded-lg border border-vita-200 px-3 py-2 outline-none focus:border-vita-500"
-          />
-          <input
-            name="species"
-            type="text"
-            placeholder="Tür (kedi, köpek...)"
-            className="rounded-lg border border-vita-200 px-3 py-2 outline-none focus:border-vita-500"
-          />
-          <input
-            name="breed"
-            type="text"
-            placeholder="Cins (opsiyonel)"
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <div className="flex items-center gap-2 text-xs text-vita-500">
-            <label className="w-20 shrink-0">Doğum:</label>
-            <input
-              name="birth_date"
-              type="date"
-              className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-          </div>
+          <Field label="Ad">
+            <input name="name" type="text" required className={inputClass} />
+          </Field>
+          <Field label="Tür">
+            <input name="species" type="text" placeholder="Kedi, köpek..." className={inputClass} />
+          </Field>
+          <Field label="Cins">
+            <input name="breed" type="text" className={inputClass} />
+          </Field>
+          <Field label="Ağırlık (kg)">
+            <input name="weight_kg" type="number" step="0.1" className={inputClass} />
+          </Field>
+          <Field label="Doğum tarihi">
+            <input name="birth_date" type="date" className={inputClass} />
+          </Field>
+          <Field label="Sonraki veteriner">
+            <input name="next_vet_date" type="date" className={inputClass} />
+          </Field>
+          <Field label="Mikroçip numarası" className="sm:col-span-2">
+            <input name="microchip_number" type="text" className={inputClass} />
+          </Field>
         </div>
-        <div className="flex items-center gap-2 text-xs text-vita-500">
-          <label className="w-28 shrink-0">Sonraki veteriner:</label>
-          <input
-            name="next_vet_date"
-            type="date"
-            className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+        <Field label="Notlar">
+          <textarea
+            name="notes"
+            placeholder="Mama, alerji, aşı geçmişi..."
+            rows={2}
+            className={inputClass}
           />
-        </div>
-        <textarea
-          name="notes"
-          placeholder="Notlar (opsiyonel)"
-          rows={2}
-          className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
+        </Field>
         <button
           type="submit"
           className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"

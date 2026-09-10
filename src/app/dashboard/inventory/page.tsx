@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
+import { Field, inputClass } from "@/components/Field";
 import { addItem } from "./actions";
 import { InventoryItemRow, type InventoryItemRow as InventoryItemRowType } from "./InventoryItemRow";
 
@@ -7,7 +8,9 @@ export default async function InventoryPage() {
   const supabase = await createClient();
   const { data: items } = await supabase
     .from("inventory_items")
-    .select("id, name, category, location, purchase_date, warranty_until, value, note")
+    .select(
+      "id, name, category, location, purchase_date, warranty_until, value, serial_number, condition, note"
+    )
     .order("created_at", { ascending: false });
 
   return (
@@ -17,57 +20,42 @@ export default async function InventoryPage() {
         description="Evdeki eşyaların, garanti belgelerinin ve değerli objelerin listesi."
       />
 
-      <form action={addItem} className="space-y-2 rounded-xl border border-vita-100 bg-white p-4">
+      <form action={addItem} className="space-y-3 rounded-xl border border-vita-100 bg-white p-4">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <input
-            name="name"
-            type="text"
-            placeholder="Ad *"
-            required
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <input
-            name="category"
-            type="text"
-            placeholder="Kategori (elektronik, mobilya...)"
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <input
-            name="location"
-            type="text"
-            placeholder="Konum (salon, garaj...)"
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <input
-            name="value"
-            type="number"
-            step="0.01"
-            placeholder="Değer (TL, opsiyonel)"
-            className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <div className="flex items-center gap-2 text-xs text-vita-500">
-            <label className="w-24 shrink-0">Alım tarihi:</label>
-            <input
-              name="purchase_date"
-              type="date"
-              className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-xs text-vita-500">
-            <label className="w-24 shrink-0">Garanti biter:</label>
-            <input
-              name="warranty_until"
-              type="date"
-              className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-          </div>
+          <Field label="Ad">
+            <input name="name" type="text" required className={inputClass} />
+          </Field>
+          <Field label="Kategori">
+            <input name="category" type="text" placeholder="Elektronik, mobilya..." className={inputClass} />
+          </Field>
+          <Field label="Konum">
+            <input name="location" type="text" placeholder="Salon, garaj..." className={inputClass} />
+          </Field>
+          <Field label="Değer (TL)">
+            <input name="value" type="number" step="0.01" className={inputClass} />
+          </Field>
+          <Field label="Seri numarası">
+            <input name="serial_number" type="text" className={inputClass} />
+          </Field>
+          <Field label="Durum">
+            <select name="condition" defaultValue="" className={inputClass}>
+              <option value="">Belirtilmedi</option>
+              <option value="new">Yeni</option>
+              <option value="good">İyi</option>
+              <option value="fair">Orta</option>
+              <option value="poor">Kötü</option>
+            </select>
+          </Field>
+          <Field label="Alım tarihi">
+            <input name="purchase_date" type="date" className={inputClass} />
+          </Field>
+          <Field label="Garanti bitiş">
+            <input name="warranty_until" type="date" className={inputClass} />
+          </Field>
         </div>
-        <textarea
-          name="note"
-          placeholder="Not (seri no, fatura yeri...)"
-          rows={2}
-          className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-        />
+        <Field label="Not">
+          <textarea name="note" placeholder="Fatura yeri, ek bilgi..." rows={2} className={inputClass} />
+        </Field>
         <button
           type="submit"
           className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"

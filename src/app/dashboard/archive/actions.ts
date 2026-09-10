@@ -29,6 +29,7 @@ export async function uploadFile(formData: FormData) {
   if (uploadError) return;
 
   const description = String(formData.get("description") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
 
   const { error: insertError } = await supabase.from("archive_files").insert({
     family_id: family.id,
@@ -37,6 +38,7 @@ export async function uploadFile(formData: FormData) {
     content_type: file.type || null,
     size_bytes: file.size,
     description: description || null,
+    category: category || null,
     uploaded_by: user?.id,
   });
 

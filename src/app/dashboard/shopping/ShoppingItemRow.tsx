@@ -7,6 +7,7 @@ export type ShoppingItemRow = {
   name: string;
   quantity: string | null;
   category: string | null;
+  store: string | null;
   is_bought: boolean;
 };
 
@@ -24,6 +25,7 @@ export function ShoppingItemRow({ item }: { item: ShoppingItemRow }) {
           {item.name}
         </span>
         {item.quantity && <span className="ml-2 text-sm text-vita-500">({item.quantity})</span>}
+        {item.store && <span className="ml-2 text-xs text-vita-400">{item.store}</span>}
       </div>
       {item.category && (
         <span className="shrink-0 rounded-full bg-vita-100 px-2 py-0.5 text-xs text-vita-800">

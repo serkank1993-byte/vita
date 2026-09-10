@@ -1,6 +1,9 @@
 "use client";
 
+import { Field, inputClass } from "@/components/Field";
 import { updateItem, deleteItem } from "./actions";
+
+export type InventoryCondition = "new" | "good" | "fair" | "poor";
 
 export type InventoryItemRow = {
   id: string;
@@ -10,10 +13,19 @@ export type InventoryItemRow = {
   purchase_date: string | null;
   warranty_until: string | null;
   value: number | null;
+  serial_number: string | null;
+  condition: InventoryCondition | null;
   note: string | null;
 };
 
 const currency = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" });
+
+const conditionLabels: Record<InventoryCondition, string> = {
+  new: "Yeni",
+  good: "İyi",
+  fair: "Orta",
+  poor: "Kötü",
+};
 
 function formatDate(value: string | null) {
   if (!value) return null;
@@ -42,7 +54,9 @@ export function InventoryItemRow({ item }: { item: InventoryItemRow }) {
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-vita-900">{item.name}</p>
             <p className="truncate text-xs text-vita-500">
-              {[item.category, item.location].filter(Boolean).join(" · ") || "Detay yok"}
+              {[item.category, item.location, item.condition ? conditionLabels[item.condition] : null]
+                .filter(Boolean)
+                .join(" · ") || "Detay yok"}
             </p>
           </div>
           {item.value != null && (
@@ -63,62 +77,61 @@ export function InventoryItemRow({ item }: { item: InventoryItemRow }) {
 
         <form action={updateWithId} className="space-y-2 border-t border-vita-100 px-4 py-3">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <input
-              name="name"
-              type="text"
-              defaultValue={item.name}
-              required
-              placeholder="Ad"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <input
-              name="category"
-              type="text"
-              defaultValue={item.category ?? ""}
-              placeholder="Kategori"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <input
-              name="location"
-              type="text"
-              defaultValue={item.location ?? ""}
-              placeholder="Konum (salon, garaj...)"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <input
-              name="value"
-              type="number"
-              step="0.01"
-              defaultValue={item.value ?? ""}
-              placeholder="Değer (TL)"
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            />
-            <div className="flex items-center gap-2 text-xs text-vita-500">
-              <label className="w-24 shrink-0">Alım tarihi:</label>
+            <Field label="Ad">
+              <input name="name" type="text" defaultValue={item.name} required className={inputClass} />
+            </Field>
+            <Field label="Kategori">
+              <input name="category" type="text" defaultValue={item.category ?? ""} className={inputClass} />
+            </Field>
+            <Field label="Konum">
+              <input name="location" type="text" defaultValue={item.location ?? ""} className={inputClass} />
+            </Field>
+            <Field label="Değer (TL)">
+              <input
+                name="value"
+                type="number"
+                step="0.01"
+                defaultValue={item.value ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Seri numarası">
+              <input
+                name="serial_number"
+                type="text"
+                defaultValue={item.serial_number ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Durum">
+              <select name="condition" defaultValue={item.condition ?? ""} className={inputClass}>
+                <option value="">Belirtilmedi</option>
+                <option value="new">Yeni</option>
+                <option value="good">İyi</option>
+                <option value="fair">Orta</option>
+                <option value="poor">Kötü</option>
+              </select>
+            </Field>
+            <Field label="Alım tarihi">
               <input
                 name="purchase_date"
                 type="date"
                 defaultValue={item.purchase_date ?? ""}
-                className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+                className={inputClass}
               />
-            </div>
-            <div className="flex items-center gap-2 text-xs text-vita-500">
-              <label className="w-24 shrink-0">Garanti biter:</label>
+            </Field>
+            <Field label="Garanti bitiş">
               <input
                 name="warranty_until"
                 type="date"
                 defaultValue={item.warranty_until ?? ""}
-                className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+                className={inputClass}
               />
-            </div>
+            </Field>
           </div>
-          <textarea
-            name="note"
-            defaultValue={item.note ?? ""}
-            placeholder="Not (seri no, fatura yeri...)"
-            rows={2}
-            className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
+          <Field label="Not">
+            <textarea name="note" defaultValue={item.note ?? ""} rows={2} className={inputClass} />
+          </Field>
           <div className="flex items-center gap-2">
             <button
               type="submit"

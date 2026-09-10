@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentFamily } from "@/lib/family";
 
+const CONDITIONS = ["new", "good", "fair", "poor"] as const;
+
 function readDate(formData: FormData, field: string) {
   const value = String(formData.get(field) ?? "").trim();
   return value ? value : null;
@@ -14,6 +16,11 @@ function readValue(formData: FormData) {
   if (!raw) return null;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readCondition(formData: FormData) {
+  const value = String(formData.get("condition") ?? "").trim();
+  return (CONDITIONS as readonly string[]).includes(value) ? value : null;
 }
 
 export async function addItem(formData: FormData) {
@@ -36,6 +43,8 @@ export async function addItem(formData: FormData) {
     purchase_date: readDate(formData, "purchase_date"),
     warranty_until: readDate(formData, "warranty_until"),
     value: readValue(formData),
+    serial_number: String(formData.get("serial_number") ?? "").trim() || null,
+    condition: readCondition(formData),
     note: String(formData.get("note") ?? "").trim() || null,
     created_by: user?.id,
   });
@@ -57,6 +66,8 @@ export async function updateItem(id: string, formData: FormData) {
       purchase_date: readDate(formData, "purchase_date"),
       warranty_until: readDate(formData, "warranty_until"),
       value: readValue(formData),
+      serial_number: String(formData.get("serial_number") ?? "").trim() || null,
+      condition: readCondition(formData),
       note: String(formData.get("note") ?? "").trim() || null,
     })
     .eq("id", id);

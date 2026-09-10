@@ -1,6 +1,7 @@
 "use client";
 
 import type { FamilyMember } from "@/lib/family";
+import { Field, inputClass } from "@/components/Field";
 import { toggleTodo, deleteTodo, updateTodo } from "./actions";
 
 export type TodoRow = {
@@ -9,7 +10,20 @@ export type TodoRow = {
   description: string | null;
   due_date: string | null;
   is_done: boolean;
+  priority: "low" | "medium" | "high";
   assigned_to: string | null;
+};
+
+const priorityLabels: Record<TodoRow["priority"], string> = {
+  low: "Düşük",
+  medium: "Orta",
+  high: "Yüksek",
+};
+
+const priorityDotClass: Record<TodoRow["priority"], string> = {
+  low: "bg-vita-300",
+  medium: "bg-amber-400",
+  high: "bg-red-500",
 };
 
 function formatDueDate(dueDate: string | null) {
@@ -44,6 +58,10 @@ export function TodoItem({ todo, members }: { todo: TodoRow; members: FamilyMemb
             className="h-4 w-4 shrink-0 rounded border-vita-300 text-vita-600"
           />
           <span
+            className={`h-2 w-2 shrink-0 rounded-full ${priorityDotClass[todo.priority]}`}
+            title={`Öncelik: ${priorityLabels[todo.priority]}`}
+          />
+          <span
             className={`flex-1 truncate ${
               todo.is_done ? "text-vita-400 line-through" : "text-vita-900"
             }`}
@@ -66,37 +84,44 @@ export function TodoItem({ todo, members }: { todo: TodoRow; members: FamilyMemb
           )}
         </summary>
 
-        <form
-          action={updateWithId}
-          className="space-y-2 border-t border-vita-100 px-4 py-3"
-        >
+        <form action={updateWithId} className="space-y-2 border-t border-vita-100 px-4 py-3">
           <input type="hidden" name="title" value={todo.title} />
-          <textarea
-            name="description"
-            defaultValue={todo.description ?? ""}
-            placeholder="Detay ekle..."
-            rows={2}
-            className="w-full rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              name="due_date"
-              type="date"
-              defaultValue={todo.due_date ?? ""}
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
+          <Field label="Detay">
+            <textarea
+              name="description"
+              defaultValue={todo.description ?? ""}
+              rows={2}
+              className={inputClass}
             />
-            <select
-              name="assigned_to"
-              defaultValue={todo.assigned_to ?? ""}
-              className="rounded-lg border border-vita-200 px-3 py-2 text-sm outline-none focus:border-vita-500"
-            >
-              <option value="">Atanmadı</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.full_name || m.email}
-                </option>
-              ))}
-            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Field label="Son tarih">
+              <input
+                name="due_date"
+                type="date"
+                defaultValue={todo.due_date ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Öncelik">
+              <select name="priority" defaultValue={todo.priority} className={inputClass}>
+                <option value="low">Düşük</option>
+                <option value="medium">Orta</option>
+                <option value="high">Yüksek</option>
+              </select>
+            </Field>
+            <Field label="Sorumlu" className="col-span-2 sm:col-span-1">
+              <select name="assigned_to" defaultValue={todo.assigned_to ?? ""} className={inputClass}>
+                <option value="">Atanmadı</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.full_name || m.email}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
+          <div className="flex items-center gap-2">
             <button
               type="submit"
               className="rounded-lg bg-vita-600 px-3 py-2 text-sm font-medium text-white hover:bg-vita-700"

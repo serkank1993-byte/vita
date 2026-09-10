@@ -8,6 +8,7 @@ export type ArchiveFileRow = {
   storage_path: string;
   size_bytes: number | null;
   description: string | null;
+  category: string | null;
   created_at: string;
   downloadUrl: string | null;
 };
@@ -23,7 +24,14 @@ export function ArchiveFileRow({ file }: { file: ArchiveFileRow }) {
   return (
     <li className="flex items-center gap-3 rounded-lg border border-vita-100 bg-white px-4 py-3">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-vita-900">{file.file_name}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate text-sm font-medium text-vita-900">{file.file_name}</p>
+          {file.category && (
+            <span className="rounded-full bg-vita-100 px-2 py-0.5 text-xs text-vita-800">
+              {file.category}
+            </span>
+          )}
+        </div>
         <p className="truncate text-xs text-vita-500">
           {new Date(file.created_at).toLocaleDateString("tr-TR", {
             day: "numeric",

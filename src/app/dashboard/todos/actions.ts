@@ -17,6 +17,11 @@ function readDueDate(formData: FormData) {
   return value ? value : null;
 }
 
+function readPriority(formData: FormData) {
+  const value = String(formData.get("priority") ?? "").trim();
+  return value === "low" || value === "high" ? value : "medium";
+}
+
 export async function addTodo(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
@@ -37,11 +42,13 @@ export async function addTodo(formData: FormData) {
     title,
     description: description || null,
     due_date: readDueDate(formData),
+    priority: readPriority(formData),
     assigned_to: readAssignedTo(formData, members.map((m) => m.id)),
     created_by: user?.id,
   });
 
   revalidatePath("/dashboard/todos");
+  revalidatePath("/dashboard");
 }
 
 export async function updateTodo(id: string, formData: FormData) {
@@ -61,21 +68,25 @@ export async function updateTodo(id: string, formData: FormData) {
       title,
       description: description || null,
       due_date: readDueDate(formData),
+      priority: readPriority(formData),
       assigned_to: readAssignedTo(formData, members.map((m) => m.id)),
     })
     .eq("id", id);
 
   revalidatePath("/dashboard/todos");
+  revalidatePath("/dashboard");
 }
 
 export async function toggleTodo(id: string, isDone: boolean) {
   const supabase = await createClient();
   await supabase.from("todos").update({ is_done: isDone }).eq("id", id);
   revalidatePath("/dashboard/todos");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteTodo(id: string) {
   const supabase = await createClient();
   await supabase.from("todos").delete().eq("id", id);
   revalidatePath("/dashboard/todos");
+  revalidatePath("/dashboard");
 }
