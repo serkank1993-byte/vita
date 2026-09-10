@@ -29,3 +29,31 @@ export async function getCurrentFamily(): Promise<CurrentFamily | null> {
     role: data.role,
   };
 }
+
+export type FamilyMember = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+};
+
+export async function getFamilyMembers(familyId: string): Promise<FamilyMember[]> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("family_members")
+    .select("user_id, profiles ( id, full_name, email )")
+    .eq("family_id", familyId);
+
+  if (!data) {
+    return [];
+  }
+
+  return data.map((row) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    return {
+      id: row.user_id,
+      full_name: profile?.full_name ?? null,
+      email: profile?.email ?? null,
+    };
+  });
+}
