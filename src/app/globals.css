@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vita-50: #f2f8f6;
+  --color-vita-100: #dcece5;
+  --color-vita-200: #b9d9cc;
+  --color-vita-300: #8dbfac;
+  --color-vita-400: #5fa088;
+  --color-vita-500: #3f8570;
+  --color-vita-600: #2f6b5a;
+  --color-vita-700: #28564a;
+  --color-vita-800: #22453c;
+  --color-vita-900: #1c3932;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #f7f9f8;
+  color: #1c3932;
+}
