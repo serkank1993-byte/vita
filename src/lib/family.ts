@@ -57,3 +57,21 @@ export async function getFamilyMembers(familyId: string): Promise<FamilyMember[]
     };
   });
 }
+
+export type CalendarCategory = {
+  id: string;
+  name: string;
+  color: string;
+};
+
+export async function getCalendarCategories(familyId: string): Promise<CalendarCategory[]> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("calendar_categories")
+    .select("id, name, color")
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: true });
+
+  return data ?? [];
+}

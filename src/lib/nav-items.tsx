@@ -8,6 +8,7 @@ import {
   HeartPulse,
   Package,
   Archive,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,4 +28,5 @@ export const navItems: NavItem[] = [
   { href: "/dashboard/health", label: "Sağlık Takibi", icon: HeartPulse },
   { href: "/dashboard/inventory", label: "Envanter", icon: Package },
   { href: "/dashboard/archive", label: "Dijital Arşiv", icon: Archive },
+  { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];

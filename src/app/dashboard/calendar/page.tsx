@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentFamily, getCalendarCategories } from "@/lib/family";
 import { PageHeader } from "@/components/PageHeader";
 import { CalendarGrid, type CalendarEvent } from "./CalendarGrid";
 
@@ -30,12 +31,17 @@ export default async function CalendarPage({
   const rangeEnd = `${year}-${monthStr}-${String(lastDay).padStart(2, "0")}`;
 
   const supabase = await createClient();
-  const { data: events } = await supabase
-    .from("events")
-    .select("id, title, description, location, category, event_date, event_time")
-    .gte("event_date", rangeStart)
-    .lte("event_date", rangeEnd)
-    .order("event_time", { ascending: true, nullsFirst: true });
+
+  const [family, { data: events }] = await Promise.all([
+    getCurrentFamily(),
+    supabase
+      .from("events")
+      .select("id, title, description, location, category_id, event_date, event_time")
+      .gte("event_date", rangeStart)
+      .lte("event_date", rangeEnd)
+      .order("event_time", { ascending: true, nullsFirst: true }),
+  ]);
+  const categories = family ? await getCalendarCategories(family.id) : [];
 
   const prevDate = new Date(year, month - 1, 1);
   const nextDate = new Date(year, month + 1, 1);
@@ -51,6 +57,7 @@ export default async function CalendarPage({
         year={year}
         month={month}
         events={(events ?? []) as CalendarEvent[]}
+        categories={categories}
         prevHref={`/dashboard/calendar?month=${monthParam(prevDate.getFullYear(), prevDate.getMonth())}`}
         nextHref={`/dashboard/calendar?month=${monthParam(nextDate.getFullYear(), nextDate.getMonth())}`}
         todayHref={`/dashboard/calendar?month=${monthParam(now.getFullYear(), now.getMonth())}`}

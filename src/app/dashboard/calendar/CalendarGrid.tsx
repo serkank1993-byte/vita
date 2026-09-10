@@ -4,21 +4,16 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Field, inputClass } from "@/components/Field";
+import type { CalendarCategory } from "@/lib/family";
+import { dotClassFor, pillClassFor } from "@/lib/category-colors";
 import { addEvent, updateEvent, deleteEvent } from "./actions";
-import {
-  EVENT_CATEGORIES,
-  categoryLabels,
-  categoryDot,
-  categoryPill,
-  type EventCategory,
-} from "./categories";
 
 export type CalendarEvent = {
   id: string;
   title: string;
   description: string | null;
   location: string | null;
-  category: EventCategory;
+  category_id: string | null;
   event_date: string;
   event_time: string | null;
 };
@@ -58,6 +53,7 @@ export function CalendarGrid({
   year,
   month,
   events,
+  categories,
   prevHref,
   nextHref,
   todayHref,
@@ -65,12 +61,15 @@ export function CalendarGrid({
   year: number;
   month: number;
   events: CalendarEvent[];
+  categories: CalendarCategory[];
   prevHref: string;
   nextHref: string;
   todayHref: string;
 }) {
   const [modalState, setModalState] = useState<ModalState>(null);
   const [isPending, startTransition] = useTransition();
+
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
 
   const cells = buildMonthCells(year, month);
   const eventsByDate = new Map<string, CalendarEvent[]>();
@@ -149,10 +148,10 @@ export function CalendarGrid({
       </div>
 
       <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1">
-        {EVENT_CATEGORIES.map((cat) => (
-          <span key={cat} className="flex items-center gap-1.5 text-xs text-vita-600">
-            <span className={`h-2 w-2 rounded-full ${categoryDot[cat]}`} />
-            {categoryLabels[cat]}
+        {categories.map((cat) => (
+          <span key={cat.id} className="flex items-center gap-1.5 text-xs text-vita-600">
+            <span className={`h-2 w-2 rounded-full ${dotClassFor(cat.color)}`} />
+            {cat.name}
           </span>
         ))}
       </div>
@@ -187,19 +186,24 @@ export function CalendarGrid({
                       {cell.date.getDate()}
                     </span>
                     <div className="mt-1 space-y-1">
-                      {dayEvents.slice(0, 3).map((ev) => (
-                        <button
-                          key={ev.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setModalState({ mode: "edit", event: ev });
-                          }}
-                          className={`block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] ${categoryPill[ev.category]}`}
-                        >
-                          {ev.event_time ? `${ev.event_time.slice(0, 5)} ` : ""}
-                          {ev.title}
-                        </button>
-                      ))}
+                      {dayEvents.slice(0, 3).map((ev) => {
+                        const cat = ev.category_id ? categoryById.get(ev.category_id) : undefined;
+                        return (
+                          <button
+                            key={ev.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModalState({ mode: "edit", event: ev });
+                            }}
+                            className={`block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] ${
+                              cat ? pillClassFor(cat.color) : "bg-vita-100 text-vita-700"
+                            }`}
+                          >
+                            {ev.event_time ? `${ev.event_time.slice(0, 5)} ` : ""}
+                            {ev.title}
+                          </button>
+                        );
+                      })}
                       {dayEvents.length > 3 && (
                         <p className="px-1.5 text-[11px] text-vita-400">+{dayEvents.length - 3} daha</p>
                       )}
@@ -256,15 +260,18 @@ export function CalendarGrid({
                     className={inputClass}
                   />
                 </Field>
-                <Field label="Tür">
+                <Field label="Kategori">
                   <select
-                    name="category"
-                    defaultValue={modalState.mode === "edit" ? modalState.event.category : "general"}
+                    name="category_id"
+                    defaultValue={
+                      modalState.mode === "edit" ? modalState.event.category_id ?? "" : categories[0]?.id ?? ""
+                    }
                     className={inputClass}
                   >
-                    {EVENT_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {categoryLabels[cat]}
+                    <option value="">Kategorisiz</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
                       </option>
                     ))}
                   </select>

@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentFamily } from "@/lib/family";
-import { isEventCategory } from "./categories";
+import { getCurrentFamily, getCalendarCategories } from "@/lib/family";
 
-function readCategory(formData: FormData) {
-  const value = String(formData.get("category") ?? "");
-  return isEventCategory(value) ? value : "general";
+async function readCategoryId(formData: FormData, familyId: string) {
+  const value = String(formData.get("category_id") ?? "").trim();
+  if (!value) return null;
+
+  const categories = await getCalendarCategories(familyId);
+  return categories.some((c) => c.id === value) ? value : null;
 }
 
 export async function addEvent(formData: FormData) {
@@ -32,7 +34,7 @@ export async function addEvent(formData: FormData) {
     title,
     description: description || null,
     location: location || null,
-    category: readCategory(formData),
+    category_id: await readCategoryId(formData, family.id),
     event_date: eventDate,
     event_time: eventTime || null,
     created_by: user?.id,
@@ -47,6 +49,9 @@ export async function updateEvent(id: string, formData: FormData) {
   const eventDate = String(formData.get("event_date") ?? "").trim();
   if (!title || !eventDate) return;
 
+  const family = await getCurrentFamily();
+  if (!family) return;
+
   const eventTime = String(formData.get("event_time") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim();
@@ -58,7 +63,7 @@ export async function updateEvent(id: string, formData: FormData) {
       title,
       description: description || null,
       location: location || null,
-      category: readCategory(formData),
+      category_id: await readCategoryId(formData, family.id),
       event_date: eventDate,
       event_time: eventTime || null,
     })
