@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentFamily, getFamilyMembers } from "@/lib/family";
+import { PageHeader } from "@/components/PageHeader";
 import { addTodo } from "./actions";
 import { TodoItem, type TodoRow } from "./TodoItem";
 
@@ -16,13 +17,12 @@ export default async function TodosPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-semibold text-vita-900">Yapılacaklar</h1>
-      <p className="mt-1 text-sm text-vita-600">
-        Ailece paylaşılan görev listesi — tarih ve sorumlu atayabilir, göreve
-        tıklayarak detay ekleyebilirsin.
-      </p>
+      <PageHeader
+        title="Yapılacaklar"
+        description="Ailece paylaşılan görev listesi — tarih ve sorumlu atayabilir, göreve tıklayarak detay ekleyebilirsin."
+      />
 
-      <form action={addTodo} className="mt-6 space-y-2 rounded-xl border border-vita-100 bg-white p-4">
+      <form action={addTodo} className="space-y-2 rounded-xl border border-vita-100 bg-white p-4">
         <input
           name="title"
           type="text"
