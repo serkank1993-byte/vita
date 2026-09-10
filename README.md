@@ -30,9 +30,15 @@ ve ailenin davet kodu kullanılır.
 
 - ✅ Kayıt / giriş (Supabase Auth)
 - ✅ Aile oluşturma / davet koduyla katılma
-- ✅ Yapılacaklar listesi (aile bazlı, gerçek zamanlı olmayan basit CRUD)
-- 🚧 Alışveriş listesi, evcil hayvanlar, takvim, gelir/gider, sağlık takibi,
-  envanter, dijital arşiv — placeholder sayfalar hazır, veri modeli sırayla eklenecek.
+- ✅ Yapılacaklar — detay, son tarih, sorumlu atama
+- ✅ Alışveriş Listesi — ürün/miktar/kategori, alındı işaretleme
+- ✅ Evcil Hayvanlar — tür, cins, doğum tarihi, veteriner hatırlatması
+- ✅ Takvim — yaklaşan/geçmiş etkinlikler
+- ✅ Gelir / Gider — gelir-gider kayıtları ve bakiye özeti
+- ✅ Sağlık Takibi — kişi bazlı kontrol/aşı kayıtları ve hatırlatma
+- ✅ Envanter — eşya, değer, garanti takibi
+- ✅ Dijital Arşiv — Supabase Storage üzerinde aile başına izole dosya arşivi
+- ✅ PWA — ana ekrana eklenebilir, manifest + service worker hazır
 
 ## Geliştirme
 
