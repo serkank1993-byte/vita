@@ -6,13 +6,15 @@ import { HealthRecordRow, type HealthRecordRow as HealthRecordRowType } from "./
 
 export default async function HealthPage() {
   const supabase = await createClient();
-  const family = await getCurrentFamily();
-  const members = family ? await getFamilyMembers(family.id) : [];
 
-  const { data: records } = await supabase
-    .from("health_records")
-    .select("id, person_id, title, record_type, doctor_or_clinic, record_date, next_date, note")
-    .order("record_date", { ascending: false });
+  const [family, { data: records }] = await Promise.all([
+    getCurrentFamily(),
+    supabase
+      .from("health_records")
+      .select("id, person_id, title, record_type, doctor_or_clinic, record_date, next_date, note")
+      .order("record_date", { ascending: false }),
+  ]);
+  const members = family ? await getFamilyMembers(family.id) : [];
 
   return (
     <div className="max-w-2xl">

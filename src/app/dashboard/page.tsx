@@ -12,7 +12,6 @@ function shortDate(value: string) {
 
 export default async function DashboardHome() {
   const supabase = await createClient();
-  const family = await getCurrentFamily();
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const in30 = new Date();
@@ -20,6 +19,7 @@ export default async function DashboardHome() {
   const in30Str = in30.toISOString().slice(0, 10);
 
   const [
+    family,
     { data: openTodos },
     { data: openShoppingItems },
     { data: upcomingEvents },
@@ -28,6 +28,7 @@ export default async function DashboardHome() {
     { data: dueHealthRecords },
     { data: expiringInventory },
   ] = await Promise.all([
+    getCurrentFamily(),
     supabase
       .from("todos")
       .select("id, title, due_date")

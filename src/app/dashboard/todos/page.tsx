@@ -6,14 +6,16 @@ import { TodoItem, type TodoRow } from "./TodoItem";
 
 export default async function TodosPage() {
   const supabase = await createClient();
-  const family = await getCurrentFamily();
-  const members = family ? await getFamilyMembers(family.id) : [];
 
-  const { data: todos } = await supabase
-    .from("todos")
-    .select("id, title, description, due_date, is_done, priority, assigned_to")
-    .order("is_done", { ascending: true })
-    .order("due_date", { ascending: true, nullsFirst: false });
+  const [family, { data: todos }] = await Promise.all([
+    getCurrentFamily(),
+    supabase
+      .from("todos")
+      .select("id, title, description, due_date, is_done, priority, assigned_to")
+      .order("is_done", { ascending: true })
+      .order("due_date", { ascending: true, nullsFirst: false }),
+  ]);
+  const members = family ? await getFamilyMembers(family.id) : [];
 
   return (
     <div className="max-w-2xl">

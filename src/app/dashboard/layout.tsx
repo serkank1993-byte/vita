@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentFamily } from "@/lib/family";
 import { Sidebar } from "./Sidebar";
 
@@ -8,15 +7,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+  // Auth zaten middleware'de doğrulanıp yönlendiriliyor; burada tekrar
+  // supabase.auth.getUser() çağırmak sayfa geçişi başına gereksiz bir
+  // Supabase Auth API round-trip'i eklerdi.
   const family = await getCurrentFamily();
 
   if (!family) {
