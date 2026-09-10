@@ -10,9 +10,7 @@ export default async function TodosPage() {
 
   const { data: todos } = await supabase
     .from("todos")
-    .select(
-      "id, title, description, due_date, is_done, assigned_to, assignee:profiles!assigned_to ( full_name, email )"
-    )
+    .select("id, title, description, due_date, is_done, assigned_to")
     .order("is_done", { ascending: true })
     .order("due_date", { ascending: true, nullsFirst: false });
 

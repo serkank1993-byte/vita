@@ -3,8 +3,6 @@
 import type { FamilyMember } from "@/lib/family";
 import { toggleTodo, deleteTodo, updateTodo } from "./actions";
 
-type Assignee = { full_name: string | null; email: string | null } | null;
-
 export type TodoRow = {
   id: string;
   title: string;
@@ -12,7 +10,6 @@ export type TodoRow = {
   due_date: string | null;
   is_done: boolean;
   assigned_to: string | null;
-  assignee: Assignee | Assignee[] | null;
 };
 
 function formatDueDate(dueDate: string | null) {
@@ -29,7 +26,7 @@ function isOverdue(dueDate: string | null, isDone: boolean) {
 }
 
 export function TodoItem({ todo, members }: { todo: TodoRow; members: FamilyMember[] }) {
-  const assignee = Array.isArray(todo.assignee) ? todo.assignee[0] : todo.assignee;
+  const assignee = members.find((m) => m.id === todo.assigned_to) ?? null;
   const assigneeLabel = assignee?.full_name || assignee?.email || null;
   const dueLabel = formatDueDate(todo.due_date);
   const overdue = isOverdue(todo.due_date, todo.is_done);
