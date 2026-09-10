@@ -1,86 +1,60 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
-import { Field, inputClass } from "@/components/Field";
-import { addEvent } from "./actions";
-import { EventItem, type EventRow } from "./EventItem";
+import { CalendarGrid, type CalendarEvent } from "./CalendarGrid";
 
-export default async function CalendarPage() {
+function parseMonthParam(value?: string) {
+  if (value && /^\d{4}-\d{2}$/.test(value)) {
+    const [y, m] = value.split("-").map(Number);
+    return { year: y, month: m - 1 };
+  }
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() };
+}
+
+function monthParam(year: number, month: number) {
+  const d = new Date(year, month, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const { month: monthParamValue } = await searchParams;
+  const { year, month } = parseMonthParam(monthParamValue);
+
+  const monthStr = String(month + 1).padStart(2, "0");
+  const rangeStart = `${year}-${monthStr}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const rangeEnd = `${year}-${monthStr}-${String(lastDay).padStart(2, "0")}`;
+
   const supabase = await createClient();
-  const todayStr = new Date().toISOString().slice(0, 10);
-
   const { data: events } = await supabase
     .from("events")
     .select("id, title, description, location, category, event_date, event_time")
-    .order("event_date", { ascending: true })
+    .gte("event_date", rangeStart)
+    .lte("event_date", rangeEnd)
     .order("event_time", { ascending: true, nullsFirst: true });
 
-  const upcoming = (events ?? []).filter((e) => e.event_date >= todayStr);
-  const past = (events ?? []).filter((e) => e.event_date < todayStr).reverse();
+  const prevDate = new Date(year, month - 1, 1);
+  const nextDate = new Date(year, month + 1, 1);
+  const now = new Date();
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <PageHeader
         title="Takvim"
         description="Ailenin ortak etkinlikleri, randevuları ve hatırlatmaları."
       />
-
-      <form action={addEvent} className="space-y-3 rounded-xl border border-vita-100 bg-white p-4">
-        <Field label="Etkinlik başlığı">
-          <input name="title" type="text" required className={inputClass} />
-        </Field>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Field label="Tarih">
-            <input name="event_date" type="date" required className={inputClass} />
-          </Field>
-          <Field label="Saat">
-            <input name="event_time" type="time" className={inputClass} />
-          </Field>
-          <Field label="Tür">
-            <select name="category" defaultValue="general" className={inputClass}>
-              <option value="general">Genel</option>
-              <option value="birthday">Doğum günü</option>
-              <option value="appointment">Randevu</option>
-              <option value="holiday">Tatil</option>
-              <option value="reminder">Hatırlatma</option>
-            </select>
-          </Field>
-          <Field label="Konum">
-            <input name="location" type="text" className={inputClass} />
-          </Field>
-        </div>
-        <Field label="Not">
-          <textarea name="description" rows={2} className={inputClass} />
-        </Field>
-        <button
-          type="submit"
-          className="rounded-lg bg-vita-600 px-4 py-2 text-sm font-medium text-white hover:bg-vita-700"
-        >
-          Ekle
-        </button>
-      </form>
-
-      <div className="mt-6">
-        <h2 className="mb-2 text-sm font-medium text-vita-700">Yaklaşan</h2>
-        <ul className="space-y-2">
-          {upcoming.map((event) => (
-            <EventItem key={event.id} event={event as EventRow} />
-          ))}
-          {upcoming.length === 0 && (
-            <p className="text-sm text-vita-400">Yaklaşan etkinlik yok.</p>
-          )}
-        </ul>
-      </div>
-
-      {past.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-2 text-sm font-medium text-vita-700">Geçmiş</h2>
-          <ul className="space-y-2 opacity-60">
-            {past.map((event) => (
-              <EventItem key={event.id} event={event as EventRow} />
-            ))}
-          </ul>
-        </div>
-      )}
+      <CalendarGrid
+        year={year}
+        month={month}
+        events={(events ?? []) as CalendarEvent[]}
+        prevHref={`/dashboard/calendar?month=${monthParam(prevDate.getFullYear(), prevDate.getMonth())}`}
+        nextHref={`/dashboard/calendar?month=${monthParam(nextDate.getFullYear(), nextDate.getMonth())}`}
+        todayHref={`/dashboard/calendar?month=${monthParam(now.getFullYear(), now.getMonth())}`}
+      />
     </div>
   );
 }
