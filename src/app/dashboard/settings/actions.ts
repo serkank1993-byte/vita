@@ -24,7 +24,7 @@ export async function updateFamilyName(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
-export async function addCategory(formData: FormData) {
+export async function addCalendarCategory(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -42,7 +42,7 @@ export async function addCategory(formData: FormData) {
   revalidatePath("/dashboard/calendar");
 }
 
-export async function updateCategory(id: string, formData: FormData) {
+export async function updateCalendarCategory(id: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -56,9 +56,48 @@ export async function updateCategory(id: string, formData: FormData) {
   revalidatePath("/dashboard/calendar");
 }
 
-export async function deleteCategory(id: string) {
+export async function deleteCalendarCategory(id: string) {
   const supabase = await createClient();
   await supabase.from("calendar_categories").delete().eq("id", id);
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/calendar");
+}
+
+export async function addShoppingCategory(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const family = await getCurrentFamily();
+  if (!family) return;
+
+  const supabase = await createClient();
+  await supabase.from("shopping_categories").insert({
+    family_id: family.id,
+    name,
+    color: readColor(formData),
+  });
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/shopping");
+}
+
+export async function updateShoppingCategory(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const supabase = await createClient();
+  await supabase
+    .from("shopping_categories")
+    .update({ name, color: readColor(formData) })
+    .eq("id", id);
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/shopping");
+}
+
+export async function deleteShoppingCategory(id: string) {
+  const supabase = await createClient();
+  await supabase.from("shopping_categories").delete().eq("id", id);
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/shopping");
 }

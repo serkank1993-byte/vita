@@ -5,12 +5,24 @@ import { AddButton } from "@/components/AddButton";
 import { Modal } from "@/components/Modal";
 import { Field, inputClass } from "@/components/Field";
 import { CATEGORY_COLORS, colorLabels, dotClassFor } from "@/lib/category-colors";
-import type { CalendarCategory } from "@/lib/family";
-import { addCategory, updateCategory, deleteCategory } from "./actions";
 
-type ModalState = { mode: "create" } | { mode: "edit"; category: CalendarCategory } | null;
+export type SimpleCategory = { id: string; name: string; color: string };
 
-export function CategoryManager({ categories }: { categories: CalendarCategory[] }) {
+type ModalState = { mode: "create" } | { mode: "edit"; category: SimpleCategory } | null;
+
+export function CategoryManager({
+  categories,
+  addLabel,
+  addAction,
+  updateAction,
+  deleteAction,
+}: {
+  categories: SimpleCategory[];
+  addLabel: string;
+  addAction: (formData: FormData) => Promise<void>;
+  updateAction: (id: string, formData: FormData) => Promise<void>;
+  deleteAction: (id: string) => Promise<void>;
+}) {
   const [modalState, setModalState] = useState<ModalState>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -23,9 +35,9 @@ export function CategoryManager({ categories }: { categories: CalendarCategory[]
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       if (modalState?.mode === "edit") {
-        await updateCategory(modalState.category.id, formData);
+        await updateAction(modalState.category.id, formData);
       } else {
-        await addCategory(formData);
+        await addAction(formData);
       }
       closeModal();
     });
@@ -35,7 +47,7 @@ export function CategoryManager({ categories }: { categories: CalendarCategory[]
     if (modalState?.mode !== "edit") return;
     const id = modalState.category.id;
     startTransition(async () => {
-      await deleteCategory(id);
+      await deleteAction(id);
       closeModal();
     });
   }
@@ -58,7 +70,7 @@ export function CategoryManager({ categories }: { categories: CalendarCategory[]
       </ul>
 
       <div className="mt-3">
-        <AddButton label="Kategori Ekle" onClick={() => setModalState({ mode: "create" })} />
+        <AddButton label={addLabel} onClick={() => setModalState({ mode: "create" })} />
       </div>
 
       {modalState && (

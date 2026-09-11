@@ -1,12 +1,22 @@
-import { getCurrentFamily, getCalendarCategories } from "@/lib/family";
+import { getCurrentFamily, getCalendarCategories, getShoppingCategories } from "@/lib/family";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, inputClass } from "@/components/Field";
-import { updateFamilyName } from "./actions";
-import { CategoryManager } from "./CategoryManager";
+import { CategoryManager } from "@/components/CategoryManager";
+import {
+  updateFamilyName,
+  addCalendarCategory,
+  updateCalendarCategory,
+  deleteCalendarCategory,
+  addShoppingCategory,
+  updateShoppingCategory,
+  deleteShoppingCategory,
+} from "./actions";
 
 export default async function SettingsPage() {
   const family = await getCurrentFamily();
-  const categories = family ? await getCalendarCategories(family.id) : [];
+  const [calendarCategories, shoppingCategories] = family
+    ? await Promise.all([getCalendarCategories(family.id), getShoppingCategories(family.id)])
+    : [[], []];
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -46,7 +56,27 @@ export default async function SettingsPage() {
           Takvim&apos;de kullanılan etkinlik türlerini buradan ekleyip düzenleyebilirsin. Bir
           kategoriyi silersen o kategoriyi kullanan etkinlikler kategorisiz kalır.
         </p>
-        <CategoryManager categories={categories} />
+        <CategoryManager
+          categories={calendarCategories}
+          addLabel="Kategori Ekle"
+          addAction={addCalendarCategory}
+          updateAction={updateCalendarCategory}
+          deleteAction={deleteCalendarCategory}
+        />
+      </section>
+
+      <section className="rounded-xl border border-vita-100 bg-white p-4">
+        <h2 className="font-medium text-vita-900">Alışveriş Kategorileri</h2>
+        <p className="mt-0.5 text-xs text-vita-500">
+          Alışveriş Listesi&apos;nde kullanılan kategorileri buradan ekleyip düzenleyebilirsin.
+        </p>
+        <CategoryManager
+          categories={shoppingCategories}
+          addLabel="Kategori Ekle"
+          addAction={addShoppingCategory}
+          updateAction={updateShoppingCategory}
+          deleteAction={deleteShoppingCategory}
+        />
       </section>
     </div>
   );

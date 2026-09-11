@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentFamily, getShoppingCategories } from "@/lib/family";
 import { PageHeader } from "@/components/PageHeader";
 import { clearBought } from "./actions";
 import { AddItemButton } from "./AddItemButton";
@@ -6,25 +7,31 @@ import { ShoppingItemRow, type ShoppingItemRow as ShoppingItemRowType } from "./
 
 export default async function ShoppingPage() {
   const supabase = await createClient();
-  const { data: items } = await supabase
-    .from("shopping_items")
-    .select("id, name, quantity, category, store, is_bought")
-    .order("is_bought", { ascending: true })
-    .order("created_at", { ascending: false });
 
-  const boughtCount = (items ?? []).filter((i) => i.is_bought).length;
+  const [family, { data: items }] = await Promise.all([
+    getCurrentFamily(),
+    supabase
+      .from("shopping_items")
+      .select("id, name, quantity, category_id, store, is_bought")
+      .order("is_bought", { ascending: true })
+      .order("created_at", { ascending: false }),
+  ]);
+  const categories = family ? await getShoppingCategories(family.id) : [];
+
+  const rows = items ?? [];
+  const boughtCount = rows.filter((i) => i.is_bought).length;
 
   return (
     <div className="max-w-xl">
       <PageHeader
         title="Alışveriş Listesi"
         description="Ailece paylaşılan alışveriş listesi — biri alınca işaretlesin, herkes görsün."
-        action={<AddItemButton />}
+        action={<AddItemButton categories={categories} />}
       />
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-vita-400">
-          {(items ?? []).length} ürün{boughtCount > 0 ? ` · ${boughtCount} alındı` : ""}
+          {rows.length} ürün{boughtCount > 0 ? ` · ${boughtCount} alındı` : ""}
         </p>
         {boughtCount > 0 && (
           <form action={clearBought}>
@@ -36,10 +43,10 @@ export default async function ShoppingPage() {
       </div>
 
       <ul className="mt-2 space-y-2">
-        {(items ?? []).map((item) => (
-          <ShoppingItemRow key={item.id} item={item as ShoppingItemRowType} />
+        {rows.map((item) => (
+          <ShoppingItemRow key={item.id} item={item as ShoppingItemRowType} categories={categories} />
         ))}
-        {(items ?? []).length === 0 && (
+        {rows.length === 0 && (
           <p className="text-sm text-vita-400">Liste boş. Sağ üstten ürün ekleyebilirsin.</p>
         )}
       </ul>

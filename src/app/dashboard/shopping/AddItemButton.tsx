@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { ShoppingCategory } from "@/lib/family";
 import { AddButton } from "@/components/AddButton";
 import { Modal } from "@/components/Modal";
 import { Field, inputClass } from "@/components/Field";
 import { addItem } from "./actions";
 
-export function AddItemButton() {
+export function AddItemButton({ categories }: { categories: ShoppingCategory[] }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -33,7 +34,14 @@ export function AddItemButton() {
                 <input name="quantity" type="text" placeholder="1 kg, 2 adet..." className={inputClass} />
               </Field>
               <Field label="Kategori">
-                <input name="category" type="text" placeholder="Market, eczane..." className={inputClass} />
+                <select name="category_id" defaultValue="" className={inputClass}>
+                  <option value="">Kategorisiz</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Nereden" className="col-span-2">
                 <input name="store" type="text" placeholder="Migros, Şok..." className={inputClass} />

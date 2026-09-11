@@ -1,17 +1,27 @@
 "use client";
 
+import type { ShoppingCategory } from "@/lib/family";
+import { pillClassFor } from "@/lib/category-colors";
 import { toggleItem, deleteItem } from "./actions";
 
 export type ShoppingItemRow = {
   id: string;
   name: string;
   quantity: string | null;
-  category: string | null;
+  category_id: string | null;
   store: string | null;
   is_bought: boolean;
 };
 
-export function ShoppingItemRow({ item }: { item: ShoppingItemRow }) {
+export function ShoppingItemRow({
+  item,
+  categories,
+}: {
+  item: ShoppingItemRow;
+  categories: ShoppingCategory[];
+}) {
+  const category = categories.find((c) => c.id === item.category_id) ?? null;
+
   return (
     <li className="flex items-center gap-3 rounded-lg border border-vita-100 bg-white px-4 py-3">
       <input
@@ -27,9 +37,9 @@ export function ShoppingItemRow({ item }: { item: ShoppingItemRow }) {
         {item.quantity && <span className="ml-2 text-sm text-vita-500">({item.quantity})</span>}
         {item.store && <span className="ml-2 text-xs text-vita-400">{item.store}</span>}
       </div>
-      {item.category && (
-        <span className="shrink-0 rounded-full bg-vita-100 px-2 py-0.5 text-xs text-vita-800">
-          {item.category}
+      {category && (
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${pillClassFor(category.color)}`}>
+          {category.name}
         </span>
       )}
       <button

@@ -75,3 +75,21 @@ export async function getCalendarCategories(familyId: string): Promise<CalendarC
 
   return data ?? [];
 }
+
+export type ShoppingCategory = {
+  id: string;
+  name: string;
+  color: string;
+};
+
+export async function getShoppingCategories(familyId: string): Promise<ShoppingCategory[]> {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("shopping_categories")
+    .select("id, name, color")
+    .eq("family_id", familyId)
+    .order("created_at", { ascending: true });
+
+  return data ?? [];
+}
