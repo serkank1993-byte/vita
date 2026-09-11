@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { PetSpecies } from "@/lib/family";
 import { AddButton } from "@/components/AddButton";
 import { Modal } from "@/components/Modal";
 import { Field, inputClass } from "@/components/Field";
 import { addPet } from "./actions";
 
-export function AddPetButton() {
+export function AddPetButton({ species }: { species: PetSpecies[] }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -30,10 +31,14 @@ export function AddPetButton() {
                 <input name="name" type="text" required className={inputClass} />
               </Field>
               <Field label="Tür">
-                <input name="species" type="text" placeholder="Kedi, köpek..." className={inputClass} />
-              </Field>
-              <Field label="Cins">
-                <input name="breed" type="text" className={inputClass} />
+                <select name="species_id" defaultValue="" className={inputClass}>
+                  <option value="">Belirtilmedi</option>
+                  {species.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Ağırlık (kg)">
                 <input name="weight_kg" type="number" step="0.1" className={inputClass} />
@@ -41,11 +46,8 @@ export function AddPetButton() {
               <Field label="Doğum tarihi">
                 <input name="birth_date" type="date" className={inputClass} />
               </Field>
-              <Field label="Sonraki veteriner">
+              <Field label="Sonraki veteriner" className="col-span-2">
                 <input name="next_vet_date" type="date" className={inputClass} />
-              </Field>
-              <Field label="Mikroçip numarası" className="col-span-2">
-                <input name="microchip_number" type="text" className={inputClass} />
               </Field>
             </div>
             <Field label="Notlar">

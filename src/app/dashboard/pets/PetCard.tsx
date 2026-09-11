@@ -1,17 +1,17 @@
 "use client";
 
+import type { PetSpecies } from "@/lib/family";
+import { pillClassFor } from "@/lib/category-colors";
 import { Field, inputClass } from "@/components/Field";
 import { updatePet, deletePet } from "./actions";
 
 export type PetRow = {
   id: string;
   name: string;
-  species: string | null;
-  breed: string | null;
+  species_id: string | null;
   birth_date: string | null;
   next_vet_date: string | null;
   weight_kg: number | null;
-  microchip_number: string | null;
   notes: string | null;
 };
 
@@ -31,9 +31,10 @@ function isOverdue(value: string | null) {
   return new Date(value + "T00:00:00") < today;
 }
 
-export function PetCard({ pet }: { pet: PetRow }) {
+export function PetCard({ pet, species }: { pet: PetRow; species: PetSpecies[] }) {
   const updateWithId = updatePet.bind(null, pet.id);
   const vetOverdue = isOverdue(pet.next_vet_date);
+  const petSpecies = species.find((s) => s.id === pet.species_id) ?? null;
 
   return (
     <li className="rounded-xl border border-vita-100 bg-white">
@@ -42,11 +43,14 @@ export function PetCard({ pet }: { pet: PetRow }) {
           <span className="text-2xl">🐾</span>
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-vita-900">{pet.name}</p>
-            <p className="truncate text-xs text-vita-500">
-              {[pet.species, pet.breed, pet.weight_kg ? `${pet.weight_kg} kg` : null]
-                .filter(Boolean)
-                .join(" · ") || "Detay belirtilmedi"}
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {petSpecies && (
+                <span className={`rounded-full px-2 py-0.5 text-xs ${pillClassFor(petSpecies.color)}`}>
+                  {petSpecies.name}
+                </span>
+              )}
+              {pet.weight_kg && <span className="text-xs text-vita-500">{pet.weight_kg} kg</span>}
+            </div>
           </div>
           {pet.next_vet_date && (
             <span
@@ -65,10 +69,14 @@ export function PetCard({ pet }: { pet: PetRow }) {
               <input name="name" type="text" defaultValue={pet.name} required className={inputClass} />
             </Field>
             <Field label="Tür">
-              <input name="species" type="text" defaultValue={pet.species ?? ""} className={inputClass} />
-            </Field>
-            <Field label="Cins">
-              <input name="breed" type="text" defaultValue={pet.breed ?? ""} className={inputClass} />
+              <select name="species_id" defaultValue={pet.species_id ?? ""} className={inputClass}>
+                <option value="">Belirtilmedi</option>
+                {species.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Ağırlık (kg)">
               <input
@@ -87,19 +95,11 @@ export function PetCard({ pet }: { pet: PetRow }) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Sonraki veteriner">
+            <Field label="Sonraki veteriner" className="sm:col-span-2">
               <input
                 name="next_vet_date"
                 type="date"
                 defaultValue={pet.next_vet_date ?? ""}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Mikroçip numarası" className="sm:col-span-2">
-              <input
-                name="microchip_number"
-                type="text"
-                defaultValue={pet.microchip_number ?? ""}
                 className={inputClass}
               />
             </Field>

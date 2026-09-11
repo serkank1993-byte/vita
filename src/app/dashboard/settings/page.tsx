@@ -5,6 +5,7 @@ import {
   getInventoryCategories,
   getInventoryLocations,
   getArchiveCategories,
+  getPetSpecies,
 } from "@/lib/family";
 import { PageHeader } from "@/components/PageHeader";
 import { Field, inputClass } from "@/components/Field";
@@ -26,6 +27,9 @@ import {
   addArchiveCategory,
   updateArchiveCategory,
   deleteArchiveCategory,
+  addPetSpecies,
+  updatePetSpecies,
+  deletePetSpecies,
 } from "./actions";
 
 function SettingsSection({
@@ -58,16 +62,23 @@ function SettingsSection({
 
 export default async function SettingsPage() {
   const family = await getCurrentFamily();
-  const [calendarCategories, shoppingCategories, inventoryCategories, inventoryLocations, archiveCategories] =
-    family
-      ? await Promise.all([
-          getCalendarCategories(family.id),
-          getShoppingCategories(family.id),
-          getInventoryCategories(family.id),
-          getInventoryLocations(family.id),
-          getArchiveCategories(family.id),
-        ])
-      : [[], [], [], [], []];
+  const [
+    calendarCategories,
+    shoppingCategories,
+    inventoryCategories,
+    inventoryLocations,
+    archiveCategories,
+    petSpeciesList,
+  ] = family
+    ? await Promise.all([
+        getCalendarCategories(family.id),
+        getShoppingCategories(family.id),
+        getInventoryCategories(family.id),
+        getInventoryLocations(family.id),
+        getArchiveCategories(family.id),
+        getPetSpecies(family.id),
+      ])
+    : [[], [], [], [], [], []];
 
   return (
     <div className="max-w-2xl space-y-3">
@@ -162,6 +173,19 @@ export default async function SettingsPage() {
           addAction={addArchiveCategory}
           updateAction={updateArchiveCategory}
           deleteAction={deleteArchiveCategory}
+        />
+      </SettingsSection>
+
+      <SettingsSection
+        title="Evcil Hayvan Türleri"
+        description="Evcil Hayvanlar'da seçilebilen türler."
+      >
+        <CategoryManager
+          categories={petSpeciesList}
+          addLabel="Tür Ekle"
+          addAction={addPetSpecies}
+          updateAction={updatePetSpecies}
+          deleteAction={deletePetSpecies}
         />
       </SettingsSection>
     </div>

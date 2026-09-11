@@ -89,3 +89,8 @@ const archiveCategoryActions = makeCategoryActions("archive_categories", ["/dash
 export const addArchiveCategory = archiveCategoryActions.add;
 export const updateArchiveCategory = archiveCategoryActions.update;
 export const deleteArchiveCategory = archiveCategoryActions.remove;
+
+const petSpeciesActions = makeCategoryActions("pet_species", ["/dashboard/pets"]);
+export const addPetSpecies = petSpeciesActions.add;
+export const updatePetSpecies = petSpeciesActions.update;
+export const deletePetSpecies = petSpeciesActions.remove;

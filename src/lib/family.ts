@@ -100,3 +100,8 @@ export type ArchiveCategory = NamedCategory;
 export function getArchiveCategories(familyId: string) {
   return getNamedCategoryList("archive_categories", familyId);
 }
+
+export type PetSpecies = NamedCategory;
+export function getPetSpecies(familyId: string) {
+  return getNamedCategoryList("pet_species", familyId);
+}

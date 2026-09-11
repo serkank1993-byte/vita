@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentFamily } from "@/lib/family";
+import { getCurrentFamily, getPetSpecies } from "@/lib/family";
 
 function readDate(formData: FormData, field: string) {
   const value = String(formData.get(field) ?? "").trim();
@@ -14,6 +14,14 @@ function readWeight(formData: FormData) {
   if (!raw) return null;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+async function readSpeciesId(formData: FormData, familyId: string) {
+  const value = String(formData.get("species_id") ?? "").trim();
+  if (!value) return null;
+
+  const species = await getPetSpecies(familyId);
+  return species.some((s) => s.id === value) ? value : null;
 }
 
 export async function addPet(formData: FormData) {
@@ -31,12 +39,10 @@ export async function addPet(formData: FormData) {
   await supabase.from("pets").insert({
     family_id: family.id,
     name,
-    species: String(formData.get("species") ?? "").trim() || null,
-    breed: String(formData.get("breed") ?? "").trim() || null,
+    species_id: await readSpeciesId(formData, family.id),
     birth_date: readDate(formData, "birth_date"),
     next_vet_date: readDate(formData, "next_vet_date"),
     weight_kg: readWeight(formData),
-    microchip_number: String(formData.get("microchip_number") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
     created_by: user?.id,
   });
@@ -49,17 +55,18 @@ export async function updatePet(id: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
+  const family = await getCurrentFamily();
+  if (!family) return;
+
   const supabase = await createClient();
   await supabase
     .from("pets")
     .update({
       name,
-      species: String(formData.get("species") ?? "").trim() || null,
-      breed: String(formData.get("breed") ?? "").trim() || null,
+      species_id: await readSpeciesId(formData, family.id),
       birth_date: readDate(formData, "birth_date"),
       next_vet_date: readDate(formData, "next_vet_date"),
       weight_kg: readWeight(formData),
-      microchip_number: String(formData.get("microchip_number") ?? "").trim() || null,
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id);
