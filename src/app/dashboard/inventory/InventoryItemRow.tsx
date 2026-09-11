@@ -1,5 +1,7 @@
 "use client";
 
+import type { InventoryCategory, InventoryLocation } from "@/lib/family";
+import { pillClassFor } from "@/lib/category-colors";
 import { Field, inputClass } from "@/components/Field";
 import { updateItem, deleteItem } from "./actions";
 
@@ -8,8 +10,8 @@ export type InventoryCondition = "new" | "good" | "fair" | "poor";
 export type InventoryItemRow = {
   id: string;
   name: string;
-  category: string | null;
-  location: string | null;
+  category_id: string | null;
+  location_id: string | null;
   purchase_date: string | null;
   warranty_until: string | null;
   value: number | null;
@@ -43,9 +45,19 @@ function isExpired(value: string | null) {
   return new Date(value + "T00:00:00") < today;
 }
 
-export function InventoryItemRow({ item }: { item: InventoryItemRow }) {
+export function InventoryItemRow({
+  item,
+  categories,
+  locations,
+}: {
+  item: InventoryItemRow;
+  categories: InventoryCategory[];
+  locations: InventoryLocation[];
+}) {
   const updateWithId = updateItem.bind(null, item.id);
   const warrantyExpired = isExpired(item.warranty_until);
+  const category = categories.find((c) => c.id === item.category_id) ?? null;
+  const location = locations.find((l) => l.id === item.location_id) ?? null;
 
   return (
     <li className="rounded-xl border border-vita-100 bg-white">
@@ -53,11 +65,21 @@ export function InventoryItemRow({ item }: { item: InventoryItemRow }) {
         <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-vita-900">{item.name}</p>
-            <p className="truncate text-xs text-vita-500">
-              {[item.category, item.location, item.condition ? conditionLabels[item.condition] : null]
-                .filter(Boolean)
-                .join(" · ") || "Detay yok"}
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {category && (
+                <span className={`rounded-full px-2 py-0.5 text-xs ${pillClassFor(category.color)}`}>
+                  {category.name}
+                </span>
+              )}
+              {location && (
+                <span className={`rounded-full px-2 py-0.5 text-xs ${pillClassFor(location.color)}`}>
+                  {location.name}
+                </span>
+              )}
+              {item.condition && (
+                <span className="text-xs text-vita-500">{conditionLabels[item.condition]}</span>
+              )}
+            </div>
           </div>
           {item.value != null && (
             <span className="shrink-0 text-sm font-medium text-vita-700">
@@ -81,10 +103,24 @@ export function InventoryItemRow({ item }: { item: InventoryItemRow }) {
               <input name="name" type="text" defaultValue={item.name} required className={inputClass} />
             </Field>
             <Field label="Kategori">
-              <input name="category" type="text" defaultValue={item.category ?? ""} className={inputClass} />
+              <select name="category_id" defaultValue={item.category_id ?? ""} className={inputClass}>
+                <option value="">Kategorisiz</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Konum">
-              <input name="location" type="text" defaultValue={item.location ?? ""} className={inputClass} />
+              <select name="location_id" defaultValue={item.location_id ?? ""} className={inputClass}>
+                <option value="">Belirtilmedi</option>
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Değer (TL)">
               <input

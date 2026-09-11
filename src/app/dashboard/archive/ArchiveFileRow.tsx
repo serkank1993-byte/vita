@@ -1,5 +1,7 @@
 "use client";
 
+import type { ArchiveCategory } from "@/lib/family";
+import { pillClassFor } from "@/lib/category-colors";
 import { deleteFile } from "./actions";
 
 export type ArchiveFileRow = {
@@ -8,7 +10,7 @@ export type ArchiveFileRow = {
   storage_path: string;
   size_bytes: number | null;
   description: string | null;
-  category: string | null;
+  category_id: string | null;
   created_at: string;
   downloadUrl: string | null;
 };
@@ -20,15 +22,23 @@ function formatSize(bytes: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ArchiveFileRow({ file }: { file: ArchiveFileRow }) {
+export function ArchiveFileRow({
+  file,
+  categories,
+}: {
+  file: ArchiveFileRow;
+  categories: ArchiveCategory[];
+}) {
+  const category = categories.find((c) => c.id === file.category_id) ?? null;
+
   return (
     <li className="flex items-center gap-3 rounded-lg border border-vita-100 bg-white px-4 py-3">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate text-sm font-medium text-vita-900">{file.file_name}</p>
-          {file.category && (
-            <span className="rounded-full bg-vita-100 px-2 py-0.5 text-xs text-vita-800">
-              {file.category}
+          {category && (
+            <span className={`rounded-full px-2 py-0.5 text-xs ${pillClassFor(category.color)}`}>
+              {category.name}
             </span>
           )}
         </div>

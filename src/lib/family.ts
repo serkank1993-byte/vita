@@ -58,17 +58,17 @@ export async function getFamilyMembers(familyId: string): Promise<FamilyMember[]
   });
 }
 
-export type CalendarCategory = {
+export type NamedCategory = {
   id: string;
   name: string;
   color: string;
 };
 
-export async function getCalendarCategories(familyId: string): Promise<CalendarCategory[]> {
+async function getNamedCategoryList(table: string, familyId: string): Promise<NamedCategory[]> {
   const supabase = await createClient();
 
   const { data } = await supabase
-    .from("calendar_categories")
+    .from(table)
     .select("id, name, color")
     .eq("family_id", familyId)
     .order("created_at", { ascending: true });
@@ -76,20 +76,27 @@ export async function getCalendarCategories(familyId: string): Promise<CalendarC
   return data ?? [];
 }
 
-export type ShoppingCategory = {
-  id: string;
-  name: string;
-  color: string;
-};
+export type CalendarCategory = NamedCategory;
+export function getCalendarCategories(familyId: string) {
+  return getNamedCategoryList("calendar_categories", familyId);
+}
 
-export async function getShoppingCategories(familyId: string): Promise<ShoppingCategory[]> {
-  const supabase = await createClient();
+export type ShoppingCategory = NamedCategory;
+export function getShoppingCategories(familyId: string) {
+  return getNamedCategoryList("shopping_categories", familyId);
+}
 
-  const { data } = await supabase
-    .from("shopping_categories")
-    .select("id, name, color")
-    .eq("family_id", familyId)
-    .order("created_at", { ascending: true });
+export type InventoryCategory = NamedCategory;
+export function getInventoryCategories(familyId: string) {
+  return getNamedCategoryList("inventory_categories", familyId);
+}
 
-  return data ?? [];
+export type InventoryLocation = NamedCategory;
+export function getInventoryLocations(familyId: string) {
+  return getNamedCategoryList("inventory_locations", familyId);
+}
+
+export type ArchiveCategory = NamedCategory;
+export function getArchiveCategories(familyId: string) {
+  return getNamedCategoryList("archive_categories", familyId);
 }

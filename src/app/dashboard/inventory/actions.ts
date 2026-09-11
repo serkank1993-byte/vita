@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentFamily } from "@/lib/family";
+import { getCurrentFamily, getInventoryCategories, getInventoryLocations } from "@/lib/family";
 
 const CONDITIONS = ["new", "good", "fair", "poor"] as const;
 
@@ -23,12 +23,21 @@ function readCondition(formData: FormData) {
   return (CONDITIONS as readonly string[]).includes(value) ? value : null;
 }
 
+function pickValidId(value: string, list: { id: string }[]) {
+  return value && list.some((c) => c.id === value) ? value : null;
+}
+
 export async function addItem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
   const family = await getCurrentFamily();
   if (!family) return;
+
+  const [categories, locations] = await Promise.all([
+    getInventoryCategories(family.id),
+    getInventoryLocations(family.id),
+  ]);
 
   const supabase = await createClient();
   const {
@@ -38,8 +47,8 @@ export async function addItem(formData: FormData) {
   await supabase.from("inventory_items").insert({
     family_id: family.id,
     name,
-    category: String(formData.get("category") ?? "").trim() || null,
-    location: String(formData.get("location") ?? "").trim() || null,
+    category_id: pickValidId(String(formData.get("category_id") ?? "").trim(), categories),
+    location_id: pickValidId(String(formData.get("location_id") ?? "").trim(), locations),
     purchase_date: readDate(formData, "purchase_date"),
     warranty_until: readDate(formData, "warranty_until"),
     value: readValue(formData),
@@ -56,13 +65,21 @@ export async function updateItem(id: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
+  const family = await getCurrentFamily();
+  if (!family) return;
+
+  const [categories, locations] = await Promise.all([
+    getInventoryCategories(family.id),
+    getInventoryLocations(family.id),
+  ]);
+
   const supabase = await createClient();
   await supabase
     .from("inventory_items")
     .update({
       name,
-      category: String(formData.get("category") ?? "").trim() || null,
-      location: String(formData.get("location") ?? "").trim() || null,
+      category_id: pickValidId(String(formData.get("category_id") ?? "").trim(), categories),
+      location_id: pickValidId(String(formData.get("location_id") ?? "").trim(), locations),
       purchase_date: readDate(formData, "purchase_date"),
       warranty_until: readDate(formData, "warranty_until"),
       value: readValue(formData),

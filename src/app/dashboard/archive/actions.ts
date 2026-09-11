@@ -3,7 +3,7 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentFamily } from "@/lib/family";
+import { getCurrentFamily, getArchiveCategories } from "@/lib/family";
 
 export async function uploadFile(formData: FormData) {
   const file = formData.get("file");
@@ -29,7 +29,9 @@ export async function uploadFile(formData: FormData) {
   if (uploadError) return;
 
   const description = String(formData.get("description") ?? "").trim();
-  const category = String(formData.get("category") ?? "").trim();
+  const categoryId = String(formData.get("category_id") ?? "").trim();
+  const categories = await getArchiveCategories(family.id);
+  const validCategoryId = categoryId && categories.some((c) => c.id === categoryId) ? categoryId : null;
 
   const { error: insertError } = await supabase.from("archive_files").insert({
     family_id: family.id,
@@ -38,7 +40,7 @@ export async function uploadFile(formData: FormData) {
     content_type: file.type || null,
     size_bytes: file.size,
     description: description || null,
-    category: category || null,
+    category_id: validCategoryId,
     uploaded_by: user?.id,
   });
 

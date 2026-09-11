@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { ArchiveCategory } from "@/lib/family";
 import { AddButton } from "@/components/AddButton";
 import { Modal } from "@/components/Modal";
 import { Field, inputClass } from "@/components/Field";
 import { uploadFile } from "./actions";
 
-export function AddFileButton() {
+export function AddFileButton({ categories }: { categories: ArchiveCategory[] }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -30,14 +31,13 @@ export function AddFileButton() {
             </Field>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Kategori">
-                <select name="category" defaultValue="" className={inputClass}>
+                <select name="category_id" defaultValue="" className={inputClass}>
                   <option value="">Seçilmedi</option>
-                  <option value="Kimlik">Kimlik</option>
-                  <option value="Fatura">Fatura</option>
-                  <option value="Sözleşme">Sözleşme</option>
-                  <option value="Sağlık">Sağlık</option>
-                  <option value="Fotoğraf">Fotoğraf</option>
-                  <option value="Diğer">Diğer</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </Field>
               <Field label="Açıklama">

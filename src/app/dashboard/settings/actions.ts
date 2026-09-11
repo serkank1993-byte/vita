@@ -24,80 +24,68 @@ export async function updateFamilyName(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
-export async function addCalendarCategory(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) return;
+function makeCategoryActions(table: string, revalidatePaths: string[]) {
+  async function add(formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    if (!name) return;
 
-  const family = await getCurrentFamily();
-  if (!family) return;
+    const family = await getCurrentFamily();
+    if (!family) return;
 
-  const supabase = await createClient();
-  await supabase.from("calendar_categories").insert({
-    family_id: family.id,
-    name,
-    color: readColor(formData),
-  });
+    const supabase = await createClient();
+    await supabase.from(table).insert({
+      family_id: family.id,
+      name,
+      color: readColor(formData),
+    });
 
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/calendar");
+    revalidatePath("/dashboard/settings");
+    revalidatePaths.forEach((path) => revalidatePath(path));
+  }
+
+  async function update(id: string, formData: FormData) {
+    const name = String(formData.get("name") ?? "").trim();
+    if (!name) return;
+
+    const supabase = await createClient();
+    await supabase.from(table).update({ name, color: readColor(formData) }).eq("id", id);
+
+    revalidatePath("/dashboard/settings");
+    revalidatePaths.forEach((path) => revalidatePath(path));
+  }
+
+  async function remove(id: string) {
+    const supabase = await createClient();
+    await supabase.from(table).delete().eq("id", id);
+
+    revalidatePath("/dashboard/settings");
+    revalidatePaths.forEach((path) => revalidatePath(path));
+  }
+
+  return { add, update, remove };
 }
 
-export async function updateCalendarCategory(id: string, formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) return;
+const calendarCategoryActions = makeCategoryActions("calendar_categories", ["/dashboard/calendar"]);
+export const addCalendarCategory = calendarCategoryActions.add;
+export const updateCalendarCategory = calendarCategoryActions.update;
+export const deleteCalendarCategory = calendarCategoryActions.remove;
 
-  const supabase = await createClient();
-  await supabase
-    .from("calendar_categories")
-    .update({ name, color: readColor(formData) })
-    .eq("id", id);
+const shoppingCategoryActions = makeCategoryActions("shopping_categories", ["/dashboard/shopping"]);
+export const addShoppingCategory = shoppingCategoryActions.add;
+export const updateShoppingCategory = shoppingCategoryActions.update;
+export const deleteShoppingCategory = shoppingCategoryActions.remove;
 
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/calendar");
-}
+const inventoryCategoryActions = makeCategoryActions("inventory_categories", ["/dashboard/inventory"]);
+export const addInventoryCategory = inventoryCategoryActions.add;
+export const updateInventoryCategory = inventoryCategoryActions.update;
+export const deleteInventoryCategory = inventoryCategoryActions.remove;
 
-export async function deleteCalendarCategory(id: string) {
-  const supabase = await createClient();
-  await supabase.from("calendar_categories").delete().eq("id", id);
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/calendar");
-}
+const inventoryLocationActions = makeCategoryActions("inventory_locations", ["/dashboard/inventory"]);
+export const addInventoryLocation = inventoryLocationActions.add;
+export const updateInventoryLocation = inventoryLocationActions.update;
+export const deleteInventoryLocation = inventoryLocationActions.remove;
 
-export async function addShoppingCategory(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) return;
-
-  const family = await getCurrentFamily();
-  if (!family) return;
-
-  const supabase = await createClient();
-  await supabase.from("shopping_categories").insert({
-    family_id: family.id,
-    name,
-    color: readColor(formData),
-  });
-
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/shopping");
-}
-
-export async function updateShoppingCategory(id: string, formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) return;
-
-  const supabase = await createClient();
-  await supabase
-    .from("shopping_categories")
-    .update({ name, color: readColor(formData) })
-    .eq("id", id);
-
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/shopping");
-}
-
-export async function deleteShoppingCategory(id: string) {
-  const supabase = await createClient();
-  await supabase.from("shopping_categories").delete().eq("id", id);
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/shopping");
-}
+const archiveCategoryActions = makeCategoryActions("archive_categories", ["/dashboard/archive"]);
+export const addArchiveCategory = archiveCategoryActions.add;
+export const updateArchiveCategory = archiveCategoryActions.update;
+export const deleteArchiveCategory = archiveCategoryActions.remove;
